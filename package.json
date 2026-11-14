@@ -1,0 +1,37 @@
+{
+  "name": "vaultshare",
+  "version": "1.0.0",
+  "description": "VaultShare: encrypted document exchange with client-side AES-GCM, key wrapping, expiring grants, watermarking and a tamper-evident audit trail",
+  "main": "server/server.js",
+  "scripts": {
+    "prestart": "node scripts/check-node.js",
+    "start": "node server/server.js",
+    "preseed": "node scripts/check-node.js",
+    "seed": "node scripts/seed.js",
+    "prereset": "node scripts/check-node.js",
+    "reset": "node scripts/seed.js --reset",
+    "pretest": "node scripts/check-node.js",
+    "test": "node --test --test-concurrency=1 \"tests/*.test.js\"",
+    "preevaluate": "node scripts/check-node.js",
+    "evaluate": "node scripts/evaluate.js",
+    "verify-audit": "node scripts/verify-audit.js"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@fontsource/atkinson-hyperlegible": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "express": "^4.22.3",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "lucide": "^0.460.0",
+    "supertest": "^7.3.1"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "private": true
+}
