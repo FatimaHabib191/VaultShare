@@ -1,0 +1,18 @@
+Q3 Security Operations Briefing (SAMPLE DATA - fictional)
+
+Prepared for: Security steering group
+Classification: Internal - restricted distribution
+
+1. Summary
+   Phishing reports rose 14% quarter on quarter; mean time to contain fell
+   from 9.5 hours to 6.1 hours after the new triage runbook was adopted.
+
+2. Open items
+   - Rotate the shared build-server credentials (owner: platform team)
+   - Finish MFA rollout for contractor accounts (82% complete)
+   - Review data-retention exceptions for the archive bucket
+
+3. Decisions requested
+   Approve budget for an additional on-call analyst for Q4.
+
+All names, numbers and systems in this file are invented for demonstration.

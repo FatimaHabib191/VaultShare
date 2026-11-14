@@ -1,0 +1,2 @@
+name,formula
+x,=HYPERLINK("http://example.invalid","click")
