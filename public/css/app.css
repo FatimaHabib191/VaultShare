@@ -1,562 +1,574 @@
-import {
-  h, icon, pageHead, card, statCard, chip, status, severity, roleChip, avatar, emptyState, formatTime, relative, decisionCard, errorBox, alertBox,
-  field, toast, confirmDialog, modal, downloadBlob, searchBox, withBusy, copyButton,
-} from '../ui.js';
-import { get, post, put, fetchFile } from '../api.js';
-import { state } from '../vault.js';
-import { extractWatermarks } from '../files.js';
+/* ==========================================================================
+   VaultShare design system
+   One set of tokens drives every page. Components are named by role
+   (btn, field, card, chip, table, modal…) and never restyled per page.
+   ========================================================================== */
 
-// ================================================================ overview
-export async function renderOverview(main) {
-  const [o, review] = await Promise.all([get('/api/admin/overview'), get('/api/decisions?scope=all&severity=high&limit=6')]);
-  const allow = o.decisionStats.filter((s) => s.decision === 'allow').reduce((a, s) => a + s.n, 0);
-  const deny = o.decisionStats.filter((s) => s.decision === 'deny').reduce((a, s) => a + s.n, 0);
-  const perms = Object.keys(o.permissions);
+@font-face { font-family: 'Inter'; src: url('/fonts/inter-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('/fonts/inter-500.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('/fonts/inter-600.woff2') format('woff2'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('/fonts/inter-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Plex Mono'; src: url('/fonts/plexmono-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Plex Mono'; src: url('/fonts/plexmono-500.woff2') format('woff2'); font-weight: 500; font-display: swap; }
 
-  const reviewCard = card(
-    { title: 'Needs review', icon: 'shield-alert', sub: 'Latest high-severity decisions across all users', actions: h('a', { class: 'btn small', href: '#/admin/decisions' }, 'All decisions') },
-    review.decisions.length
-      ? h(
-          'ul',
-          { class: 'list' },
-          review.decisions.map((d) =>
-            h(
-              'li',
-              {},
-              h('span', { class: `dot-icon ${d.decision === 'allow' ? 'warning' : 'danger'}` }, icon(d.decision === 'allow' ? 'alert' : 'x', { label: d.decision === 'allow' ? 'Allowed, high severity' : 'Denied' })),
-              h('div', { class: 't' }, h('strong', {}, `${d.rule} · ${d.subject || '—'}`), h('div', { class: 'sub' }, `${d.actor || 'unknown'} · ${relative(d.ts)}`))
-            )
-          )
-        )
-      : emptyState({ icon: 'shield', title: 'Nothing needs review', body: 'High-severity results such as tampered files, disguised uploads or traced leaks appear here.' })
-  );
+/* ---------- tokens ---------- */
+:root {
+  /* colour */
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-2: #f9fafc;
+  --surface-3: #f1f3f8;
+  --text: #172033;
+  --text-2: #68738a;
+  --text-3: #8a93a6;
+  --accent: #635bdb;
+  --accent-hover: #5148c8;
+  --accent-soft: #efeeff;
+  --accent-ink: #4239b8;
+  --border: #e5e8f0;
+  --border-strong: #d4d9e4;
+  --success: #16845b;
+  --success-soft: #e8f6ef;
+  --warning: #b7791f;
+  --warning-ink: #8c5c12;
+  --warning-soft: #fdf4e3;
+  --danger: #d14343;
+  --danger-ink: #b42f2f;
+  --danger-soft: #fdeeee;
+  --sidebar-bg: #ffffff;
+  --sidebar-active: #efeeff;
+  --overlay: rgba(23, 32, 51, 0.42);
+  --focus: #635bdb;
 
-  const rules = card(
-    { title: 'Decisions by rule', flush: true },
-    o.decisionStats.length
-      ? h(
-          'div',
-          { class: 'table-wrap', style: 'margin-top:4px' },
-          h(
-            'table',
-            { class: 'stack-sm' },
-            h('thead', {}, h('tr', {}, h('th', {}, 'Rule'), h('th', {}, 'Action'), h('th', {}, 'Result'), h('th', {}, 'Severity'), h('th', { class: 'num' }, 'Count'), h('th', { class: 'num' }, 'Avg ms'))),
-            h(
-              'tbody',
-              {},
-              o.decisionStats.map((s) =>
-                h('tr', {}, h('td', {}, chip(s.rule, 'outline', null, 'mono')), h('td', { 'data-label': 'Action' }, s.action), h('td', { 'data-label': 'Result' }, status(s.decision)), h('td', { 'data-label': 'Severity' }, severity(s.severity)), h('td', { class: 'num', 'data-label': 'Count' }, String(s.n)), h('td', { class: 'num', 'data-label': 'Average latency' }, s.avg_ms.toFixed(2)))
-              )
-            )
-          )
-        )
-      : h('div', { style: 'padding:0 24px 24px' }, emptyState({ icon: 'decisions', title: 'No decisions yet', body: 'They appear as people upload, share and open files.' }))
-  );
+  /* type */
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --fs-title: 1.75rem;   /* 28px page titles */
+  --fs-h2: 1.25rem;      /* 20px section headings */
+  --fs-h3: 1rem;         /* 16px card headings */
+  --fs-body: 0.9063rem;  /* 14.5px body */
+  --fs-sm: 0.8125rem;    /* 13px metadata */
+  --fs-xs: 0.75rem;      /* 12px chips */
 
-  const versions = card(
-    { title: 'System', icon: 'server' },
-    h('dl', { class: 'dl' }, h('dt', {}, 'Policy engine'), h('dd', { class: 'mono' }, o.versions.engine), h('dt', {}, 'Crypto core'), h('dd', { class: 'mono' }, o.versions.crypto), h('dt', {}, 'Settings'), h('dd', {}, h('a', { href: '#/admin/settings' }, `Version ${o.versions.settings}`)))
-  );
+  /* spacing (4px scale) */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
 
-  const matrix = card(
-    { title: 'Permissions by role', icon: 'key', sub: 'Enforced by the server on every request. Administrators hold no document keys.', flush: true },
-    h(
-      'div',
-      { class: 'table-wrap', style: 'margin-top:4px' },
-      h(
-        'table',
-        { class: 'matrix' },
-        h('thead', {}, h('tr', {}, h('th', {}, 'Permission'), h('th', {}, 'Admin'), h('th', {}, 'Operator'), h('th', {}, 'Viewer'))),
-        h('tbody', {}, perms.map((a) => h('tr', {}, h('td', {}, a), ['admin', 'operator', 'viewer'].map((r) => h('td', {}, o.permissions[a][r] ? chip('Yes', 'success', 'check') : h('span', { class: 'muted', 'aria-label': 'Not allowed' }, '—'))))))
-      )
-    )
-  );
+  /* shape */
+  --r-card: 14px;
+  --r-input: 9px;
+  --r-btn: 9px;
+  --r-chip: 999px;
+  --shadow-1: 0 1px 2px rgba(23, 32, 51, 0.05);
+  --shadow-2: 0 4px 14px rgba(23, 32, 51, 0.07);
+  --shadow-3: 0 18px 48px rgba(23, 32, 51, 0.18);
 
-  main.replaceChildren(
-    pageHead('Overview', 'System health at a glance. Administrators manage people, policy and evidence but cannot read documents.', h('a', { class: 'btn primary', href: '#/admin/audit' }, icon('audit', { cls: 'sm' }), 'Open audit trail')),
-    h(
-      'div',
-      { class: 'stats' },
-      statCard({ icon: 'users', value: o.users.total, label: 'People', hint: `${o.users.byRole.operator} operators · ${o.users.byRole.viewer} viewers · ${o.users.pending} awaiting setup`, href: '#/admin/users' }),
-      statCard({ icon: 'check-circle', value: allow, label: 'Decisions allowed', href: '#/admin/decisions' }),
-      statCard({ icon: 'x-circle', value: deny, label: 'Decisions denied', href: '#/admin/decisions' }),
-      statCard({ icon: 'audit', value: o.auditEvents, label: 'Audit events', hint: 'Hash-chained', href: '#/admin/audit' })
-    ),
-    h('div', { class: 'split' }, h('div', {}, reviewCard), h('div', {}, versions)),
-    h('div', { class: 'section' }, rules),
-    h('div', { class: 'section' }, matrix)
-  );
+  /* motion */
+  --t-fast: 150ms;
+  --t-med: 200ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* layout */
+  --sidebar-w: 256px;
+  --content-max: 1200px;
+  --header-h: 64px;
+  color-scheme: light;
 }
 
-// ================================================================ people
-export async function renderUsers(main, { query } = {}) {
-  const { users } = await get('/api/admin/users');
-  const ui = { q: query?.get('q') || '', role: '' };
-  const tableHost = h('div', {});
-  const count = h('span', { class: 'count' });
-  const search = searchBox({ placeholder: 'Search people', value: ui.q, label: 'Search people', oninput: (v) => ((ui.q = v), draw()) });
-  const roleSel = h('select', { 'aria-label': 'Filter by role' }, h('option', { value: '' }, 'All roles'), ['admin', 'operator', 'viewer'].map((r) => h('option', { value: r }, `${r[0].toUpperCase()}${r.slice(1)}s`)));
-  roleSel.addEventListener('change', () => ((ui.role = roleSel.value), draw()));
-  window.addEventListener('vs:search', function onSearch(e) {
-    if (!document.body.contains(tableHost)) return window.removeEventListener('vs:search', onSearch);
-    ui.q = e.detail;
-    search.input.value = e.detail;
-    draw();
-  });
-  const reload = () => renderUsers(main, { query });
-
-  function showCode(title, username, code) {
-    const done = h('button', { type: 'button', class: 'primary' }, 'Done');
-    const ref = modal({
-      title,
-      icon: 'key',
-      content: [
-        h('p', {}, `Give this one-time code to ${username} through a separate channel, such as in person or by phone. It is shown only once and expires.`),
-        h('div', { class: 'actions', style: 'margin-top:16px' }, h('span', { class: 'code-once' }, code), copyButton(code, 'Copy code')),
-        h('p', { class: 'hint', style: 'margin-top:12px' }, `${username} chooses Set up your account on the sign-in page and enters this code.`),
-      ],
-      footer: done,
-    });
-    done.addEventListener('click', () => ref.close());
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0f1320; --surface: #161b2b; --surface-2: #1a2032; --surface-3: #20273b;
+    --text: #e7eaf2; --text-2: #a3abbe; --text-3: #7d869b;
+    --accent: #8b84f0; --accent-hover: #9d97f4; --accent-soft: #262649; --accent-ink: #b9b4ff;
+    --border: #272f45; --border-strong: #333c56;
+    --success: #4cc495; --success-soft: #133229; --warning: #e0a94a; --warning-ink: #e9bd6c; --warning-soft: #33280f;
+    --danger: #f07a7a; --danger-ink: #f39a9a; --danger-soft: #3a1c22;
+    --sidebar-bg: #131829; --sidebar-active: #262649; --overlay: rgba(0, 0, 0, 0.55); --focus: #9d97f4;
+    color-scheme: dark;
   }
-
-  function addPerson() {
-    const uname = h('input', { autocapitalize: 'none', spellcheck: 'false', placeholder: 'e.g. sara', required: true });
-    const role = h('select', {}, h('option', { value: 'operator' }, 'Operator — uploads and shares'), h('option', { value: 'viewer' }, 'Viewer — opens shared files only'), h('option', { value: 'admin' }, 'Administrator — manages the system'));
-    const err = h('div', { 'aria-live': 'assertive' });
-    const create = h('button', { type: 'submit', class: 'primary', form: 'add-person' }, 'Create and get code');
-    const cancel = h('button', { type: 'button' }, 'Cancel');
-    const form = h(
-      'form',
-      {
-        id: 'add-person',
-        style: 'margin-top:16px',
-        onsubmit: async (e) => {
-          e.preventDefault();
-          err.replaceChildren();
-          await withBusy(create, async () => {
-            try {
-              const r = await post('/api/admin/users', { username: uname.value.trim().toLowerCase(), role: role.value });
-              ref.close();
-              await reload();
-              showCode(`Enrollment code for ${r.user.username}`, r.user.username, r.enrollmentCode);
-            } catch (ex) {
-              err.append(errorBox(ex));
-            }
-          });
-        },
-      },
-      err,
-      field('Username', uname, '3–32 lowercase letters, digits, dot, dash or underscore.'),
-      field('Role', role)
-    );
-    const ref = modal({ title: 'Add a person', icon: 'user-plus', content: [h('p', {}, 'They finish setup themselves with a one-time code, which creates their key pair in their own browser.'), form], footer: [cancel, create] });
-    cancel.addEventListener('click', () => ref.close());
-    uname.focus();
-  }
-
-  async function act(u, kind, btn) {
-    const conf = {
-      reset: { title: u.status === 'pending' ? `Issue a new code for ${u.username}?` : `Issue a new key for ${u.username}?`, body: u.status === 'pending' ? 'The previous code stops working.' : 'Their current key stops working. Files shared with their old key must be shared again, and files they own become unrecoverable. Use this only for a lost password or a compromised key.', label: u.status === 'pending' ? 'Issue new code' : 'Reset key', danger: u.status !== 'pending', icon: 'key' },
-      disable: { title: `Disable ${u.username}?`, body: 'They are signed out immediately and cannot sign in until re-enabled.', label: 'Disable account', danger: true, icon: 'ban' },
-      enable: { title: `Enable ${u.username}?`, body: 'They will be able to sign in again.', label: 'Enable account', icon: 'user-check' },
-    }[kind];
-    if (!(await confirmDialog({ title: conf.title, body: conf.body, confirmLabel: conf.label, danger: conf.danger, icon: conf.icon }))) return;
-    await withBusy(btn, async () => {
-      try {
-        if (kind === 'reset') {
-          const r = await post(`/api/admin/users/${u.id}/reset`, { confirm: true });
-          await reload();
-          showCode(`New enrollment code for ${u.username}`, u.username, r.enrollmentCode);
-        } else {
-          await post(`/api/admin/users/${u.id}/status`, { status: kind === 'disable' ? 'disabled' : 'active', confirm: true });
-          toast(`${u.username} ${kind === 'disable' ? 'disabled' : 'enabled'}`);
-          reload();
-        }
-      } catch (e) {
-        toast(e.message, { bad: true });
-      }
-    });
-  }
-
-  async function changeRole(u, sel) {
-    const to = sel.value;
-    if (to === u.role) return;
-    const ok = await confirmDialog({ title: `Make ${u.username} ${to === 'admin' ? 'an administrator' : `a ${to}`}?`, body: 'They are signed out now, and the new permissions apply when they next sign in.', confirmLabel: 'Change role', icon: 'users' });
-    if (!ok) return (sel.value = u.role);
-    try {
-      await post(`/api/admin/users/${u.id}/role`, { role: to, confirm: true });
-      toast(`${u.username} is now ${to}`);
-      reload();
-    } catch (e) {
-      sel.value = u.role;
-      toast(e.message, { bad: true });
-    }
-  }
-
-  function draw() {
-    const q = ui.q.trim().toLowerCase();
-    const list = users.filter((u) => (!ui.role || u.role === ui.role) && (!q || u.username.includes(q)));
-    count.textContent = `${list.length} of ${users.length} people`;
-    if (!list.length) {
-      tableHost.replaceChildren(card({}, emptyState({ icon: 'search', title: 'No one matches', body: 'Try a different name or role.' })));
-      return;
-    }
-    tableHost.replaceChildren(
-      h(
-        'div',
-        { class: 'card flush' },
-        h(
-          'div',
-          { class: 'table-wrap' },
-          h(
-            'table',
-            { class: 'stack-sm' },
-            h('thead', {}, h('tr', {}, h('th', {}, 'Person'), h('th', {}, 'Role'), h('th', {}, 'Status'), h('th', {}, 'Key'), h('th', {}, 'Last sign-in'), h('th', {}, h('span', { class: 'sr-only' }, 'Actions')))),
-            h(
-              'tbody',
-              {},
-              list.map((u) => {
-                const self = u.id === state.user.id;
-                const sel = h('select', { 'aria-label': `Role for ${u.username}`, disabled: self, style: 'min-height:34px;width:auto;min-width:130px' }, ['admin', 'operator', 'viewer'].map((r) => h('option', { value: r }, `${r[0].toUpperCase()}${r.slice(1)}`)));
-                sel.value = u.role;
-                sel.addEventListener('change', () => changeRole(u, sel));
-                const resetBtn = self ? null : h('button', { type: 'button', class: 'small' }, icon('key', { cls: 'sm' }), u.status === 'pending' ? 'New code' : 'Reset key');
-                resetBtn?.addEventListener('click', () => act(u, 'reset', resetBtn));
-                const toggleBtn = self || u.status === 'pending' ? null : u.status === 'active' ? h('button', { type: 'button', class: 'small danger' }, 'Disable') : h('button', { type: 'button', class: 'small' }, 'Enable');
-                toggleBtn?.addEventListener('click', () => act(u, u.status === 'active' ? 'disable' : 'enable', toggleBtn));
-                return h(
-                  'tr',
-                  {},
-                  h('td', {}, h('div', { class: 'cell-main' }, avatar(u.username, { small: true }), h('div', { class: 't' }, h('strong', {}, u.username, self ? h('span', { class: 'muted' }, ' (you)') : null), h('div', { class: 'sub' }, `Joined ${formatTime(u.createdAt)}`)))),
-                  h('td', { 'data-label': 'Role' }, self ? roleChip(u.role) : sel),
-                  h('td', { 'data-label': 'Status' }, status(u.status)),
-                  h('td', { 'data-label': 'Key' }, u.keyFingerprint ? h('span', { class: 'mono-sm' }, `v${u.keyVersion} · ${u.keyFingerprint.slice(0, 12)}`) : h('span', { class: 'muted small' }, `Code expires ${relative(u.enrollmentExpiresAt)}`)),
-                  h('td', { 'data-label': 'Last sign-in' }, u.lastLoginAt ? relative(u.lastLoginAt) : 'Never'),
-                  h('td', { class: 'actions-cell' }, h('div', { class: 'actions' }, resetBtn, toggleBtn))
-                );
-              })
-            )
-          )
-        )
-      )
-    );
-  }
-
-  const addBtn = h('button', { type: 'button', class: 'primary' }, icon('user-plus', { cls: 'sm' }), 'Add person');
-  addBtn.addEventListener('click', addPerson);
-  main.replaceChildren(
-    pageHead('People', 'Create accounts and manage roles. New people finish setup themselves with a one-time code, which generates their key pair in their own browser.', addBtn),
-    h('div', { class: 'toolbar' }, search.wrap, roleSel, count),
-    tableHost
-  );
-  draw();
 }
 
-// ================================================================ settings
-const SETTING_GROUPS = [
-  ['Uploads', 'What people can upload. Checked on the server for every file.', ['max_file_size_mb', 'allowed_extensions']],
-  ['Sharing', 'Limits that apply when someone shares a file.', ['max_grant_ttl_hours', 'default_grant_ttl_hours', 'max_downloads_cap']],
-  ['Sessions and sign-in', 'How long sessions last and how hard sign-in is throttled.', ['session_idle_minutes', 'session_absolute_hours', 'login_attempts_per_15min', 'sensitive_actions_per_min']],
-  ['Keys and enrollment', 'Applies to new enrollments and new codes.', ['kdf_iterations', 'enrollment_code_hours']],
-];
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 var(--fs-body)/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: var(--fs-title); font-weight: 650; letter-spacing: -0.02em; line-height: 1.2; }
+h2 { font-size: var(--fs-h2); font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; }
+h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.35; }
+a { color: var(--accent-ink); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+img { max-width: 100%; }
+.muted { color: var(--text-2); }
+.small { font-size: var(--fs-sm); }
+.sr-only { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: -1px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+::selection { background: var(--accent-soft); }
+.icon { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.icon.sm { width: 16px; height: 16px; }
+.icon.lg { width: 22px; height: 22px; }
+.spin { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-export async function renderSettings(main) {
-  const s = await get('/api/admin/settings');
-  const inputs = {};
-  const out = h('div', { 'aria-live': 'polite' });
-  const changedLabel = h('span', { class: 'muted small' }, 'No unsaved changes');
+/* ---------- app shell ---------- */
+.app { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); min-height: 100vh; background: linear-gradient(to right, var(--sidebar-bg) calc(var(--sidebar-w) - 1px), var(--border) calc(var(--sidebar-w) - 1px), var(--border) var(--sidebar-w), transparent var(--sidebar-w)); }
+.sidebar { position: sticky; top: 0; height: 100vh; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: var(--s5) var(--s4); gap: var(--s5); overflow-y: auto; z-index: 40; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 2px var(--s2); color: var(--text); text-decoration: none; }
+.brand:hover { text-decoration: none; }
+.brand-mark { width: 32px; height: 32px; border-radius: 9px; background: var(--accent); color: #fff; display: grid; place-items: center; flex: none; }
+.brand-mark .icon { width: 18px; height: 18px; stroke-width: 2.1; }
+.brand-name { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-group { font-size: var(--fs-xs); font-weight: 600; color: var(--text-3); padding: var(--s4) var(--s3) var(--s2); }
+.nav-group:first-child { padding-top: 0; }
+.nav a { display: flex; align-items: center; gap: var(--s3); padding: 9px var(--s3); border-radius: var(--r-btn); color: var(--text-2); font-weight: 500; transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease); }
+.nav a:hover { background: var(--surface-3); color: var(--text); text-decoration: none; }
+.nav a[aria-current='page'] { background: var(--sidebar-active); color: var(--accent-ink); font-weight: 600; }
+.nav a[aria-current='page'] .icon { color: var(--accent); }
+.sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: var(--s3); }
+.key-state { display: flex; align-items: center; gap: var(--s2); font-size: var(--fs-sm); color: var(--text-2); padding: var(--s2) var(--s3); border-radius: var(--r-btn); background: var(--success-soft); }
+.key-state .icon { color: var(--success); }
+.account-card { display: flex; align-items: center; gap: var(--s3); padding: var(--s3); border: 1px solid var(--border); border-radius: var(--r-card); }
+.account-card .who { min-width: 0; flex: 1; }
+.account-card .who strong { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-ink); display: grid; place-items: center; font-weight: 600; font-size: var(--fs-sm); flex: none; text-transform: uppercase; }
+.avatar.sm { width: 28px; height: 28px; font-size: var(--fs-xs); }
 
-  const control = (key) => {
-    const def = s.schema[key];
-    if (def.type === 'list') {
-      inputs[key] = def.values.map((v) => h('input', { type: 'checkbox', value: v, checked: s.values[key].includes(v) }));
-      return h('fieldset', {}, h('legend', { class: 'label', style: 'margin-bottom:8px' }, def.label), h('div', { class: 'checks' }, inputs[key].map((cb) => h('label', { class: 'check-pill' }, cb, `.${cb.value}`))));
-    }
-    inputs[key] = h('input', { type: 'number', min: String(def.min), max: String(def.max), step: '1', value: String(s.values[key]) });
-    return field(def.label, inputs[key], `${def.min.toLocaleString()}–${def.max.toLocaleString()} · default ${Array.isArray(def.default) ? '' : def.default.toLocaleString()}`);
-  };
+.main-col { min-width: 0; display: flex; flex-direction: column; }
+.topbar { position: sticky; top: 0; z-index: 30; height: var(--header-h); display: flex; align-items: center; gap: var(--s4); padding: 0 var(--s8); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+.crumbs { display: flex; align-items: center; gap: var(--s2); min-width: 0; flex: 1; font-size: var(--fs-sm); color: var(--text-2); }
+.crumbs a { color: var(--text-2); }
+.crumbs .current { color: var(--text); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crumbs .icon { width: 14px; height: 14px; color: var(--text-3); }
+.topbar-search { position: relative; width: min(320px, 34vw); }
+.topbar-search .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+.topbar-search input { padding-left: 36px; height: 38px; min-height: 38px; background: var(--surface); }
+.topbar-actions { display: flex; align-items: center; gap: var(--s2); }
+.menu-toggle { display: none; }
+.content { width: 100%; max-width: var(--content-max); margin: 0 auto; padding: var(--s8) var(--s8) 64px; }
+.scrim { display: none; }
 
-  const current = () => {
-    const changes = {};
-    for (const [key, def] of Object.entries(s.schema)) {
-      const val = def.type === 'list' ? inputs[key].filter((c) => c.checked).map((c) => c.value) : Number(inputs[key].value);
-      if (JSON.stringify(val) !== JSON.stringify(s.values[key])) changes[key] = val;
-    }
-    return changes;
-  };
+/* ---------- page header ---------- */
+.page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--s4); flex-wrap: wrap; margin-bottom: var(--s6); }
+.page-head .lead { margin-top: 6px; color: var(--text-2); max-width: 70ch; }
+.page-head .actions { flex-wrap: wrap; }
 
-  const sections = SETTING_GROUPS.map(([title, desc, keys]) => h('div', { class: 'settings-section' }, h('div', { class: 's-desc' }, h('h3', {}, title), h('p', {}, desc)), h('div', { class: 's-fields' }, keys.filter((k) => s.schema[k]).map(control))));
-  const reason = h('input', { placeholder: 'Why are you changing this?' });
-  const apply = h('button', { type: 'submit', class: 'primary' }, 'Review and apply');
-  const cancel = h('button', { type: 'button' }, 'Discard changes');
-  cancel.addEventListener('click', () => renderSettings(main));
+/* ---------- layout helpers ---------- */
+.stack > * + * { margin-top: var(--s4); }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5); align-items: start; }
+.split { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr); gap: var(--s5); align-items: start; }
+.split > div > * + * { margin-top: var(--s5); }
+.row { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: flex-start; }
+.row > .field { flex: 1 1 160px; }
+.actions { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; }
+.spacer { flex: 1; }
+.section + .section { margin-top: var(--s6); }
 
-  const form = h(
-    'form',
-    {
-      oninput: () => {
-        const n = Object.keys(current()).length;
-        changedLabel.textContent = n ? `${n} unsaved change${n > 1 ? 's' : ''}` : 'No unsaved changes';
-      },
-      onsubmit: async (e) => {
-        e.preventDefault();
-        out.replaceChildren();
-        const changes = current();
-        if (!Object.keys(changes).length) return out.append(alertBox('info', 'Nothing changed', 'Edit a setting before applying.'));
-        if (reason.value.trim().length < 3) {
-          reason.setAttribute('aria-invalid', 'true');
-          return out.append(errorBox({ message: 'Give a short reason. It is stored with the change in the audit trail.' }));
-        }
-        reason.removeAttribute('aria-invalid');
-        const names = Object.keys(changes).map((k) => s.schema[k].label);
-        const ok = await confirmDialog({ title: `Apply ${names.length} setting change${names.length > 1 ? 's' : ''}?`, body: `${names.join(', ')}. New decisions will record settings version ${s.version + 1}.`, confirmLabel: 'Apply changes', icon: 'settings' });
-        if (!ok) return;
-        await withBusy(apply, async () => {
-          try {
-            const r = await put('/api/admin/settings', { changes, reason: reason.value.trim(), confirm: true });
-            toast(`Settings saved as version ${r.version}`);
-            renderSettings(main);
-          } catch (ex) {
-            out.append(errorBox(ex));
-          }
-        });
-      },
-    },
-    sections,
-    h('div', { class: 'save-bar' }, field('Reason for change', reason, 'Required. Stored with the change in the audit trail.'), h('div', { class: 'actions' }, changedLabel, cancel, apply))
-  );
+/* ---------- cards ---------- */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); padding: var(--s6); box-shadow: var(--shadow-1); min-width: 0; }
+.card.flush { padding: 0; overflow: hidden; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s4); flex-wrap: wrap; }
+.card-head h2, .card-head h3 { display: flex; align-items: center; gap: var(--s2); }
+.card-head .sub { color: var(--text-2); font-size: var(--fs-sm); margin-top: 2px; }
+.card.flush .card-head { padding: var(--s5) var(--s6) 0; }
+.card-foot { margin-top: var(--s5); padding-top: var(--s4); border-top: 1px solid var(--border); }
+.card.danger-zone { border-color: color-mix(in srgb, var(--danger) 30%, var(--border)); }
 
-  const history = card(
-    { title: 'Change history', icon: 'history' },
-    s.history.length
-      ? h(
-          'ol',
-          { class: 'timeline' },
-          s.history.map((v) =>
-            h(
-              'li',
-              {},
-              h('div', { class: 'actions' }, chip(`v${v.version}`, 'accent'), h('span', { class: 'muted small' }, `${formatTime(new Date(v.changed_at).toISOString())} · ${v.changed_by || 'system'}`)),
-              v.reason ? h('p', { class: 'small', style: 'margin-top:6px' }, v.reason) : null,
-              Object.keys(v.diff).length ? h('div', { class: 'diff' }, Object.entries(v.diff).map(([k, d]) => h('div', {}, `${k}: ${JSON.stringify(d.from)} → ${JSON.stringify(d.to)}`))) : null
-            )
-          )
-        )
-      : emptyState({ icon: 'history', title: 'No changes yet' })
-  );
+/* stat cards */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--s4); margin-bottom: var(--s5); }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); padding: var(--s5); display: flex; gap: var(--s4); align-items: flex-start; box-shadow: var(--shadow-1); }
+.stat .stat-icon { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); flex: none; }
+.stat .num { font-size: 1.6rem; font-weight: 650; letter-spacing: -0.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat .lbl { color: var(--text-2); font-size: var(--fs-sm); margin-top: 2px; }
+.stat .hint { color: var(--text-3); font-size: var(--fs-xs); margin-top: 6px; }
+a.stat { color: inherit; transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), transform var(--t-fast) var(--ease); }
+a.stat:hover { text-decoration: none; border-color: var(--border-strong); box-shadow: var(--shadow-2); transform: translateY(-1px); }
 
-  main.replaceChildren(
-    pageHead('Policy settings', `Currently version ${s.version}. Every change is validated, versioned and audited, and every decision records the version it was made under.`),
-    card({}, out, form),
-    h('div', { class: 'section' }, history)
-  );
+/* ---------- buttons ---------- */
+button, .btn { font: inherit; font-weight: 550; font-size: var(--fs-body); display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 40px; padding: 0 var(--s4); border-radius: var(--r-btn); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap; text-decoration: none; transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), transform 80ms var(--ease); }
+button:hover, .btn:hover { background: var(--surface-3); text-decoration: none; }
+button:active, .btn:active { transform: translateY(1px); }
+.primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 1px 2px rgba(99, 91, 219, 0.3); }
+.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.danger { color: var(--danger-ink); border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); background: var(--surface); }
+.danger:hover { background: var(--danger-soft); }
+.danger.solid { background: var(--danger); border-color: var(--danger); color: #fff; }
+.danger.solid:hover { background: var(--danger-ink); }
+.ghost { border-color: transparent; background: transparent; color: var(--text-2); }
+.ghost:hover { background: var(--surface-3); color: var(--text); }
+.small { min-height: 32px; padding: 0 var(--s3); font-size: var(--fs-sm); border-radius: 8px; }
+.icon-btn { min-height: 38px; width: 38px; padding: 0; }
+.icon-btn.small { width: 32px; min-height: 32px; }
+button:disabled, .btn[aria-disabled='true'] { opacity: 0.55; cursor: not-allowed; transform: none; }
+button.busy { position: relative; color: transparent !important; }
+button.busy::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-color: rgba(255, 255, 255, 0.9) rgba(255, 255, 255, 0.9) transparent; animation: spin 0.8s linear infinite; }
+button:not(.primary):not(.solid).busy::after { border-color: var(--accent) var(--accent) transparent; }
+
+/* ---------- forms ---------- */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--s4); min-width: 0; }
+.field label, .label, legend.label { font-weight: 550; font-size: var(--fs-sm); color: var(--text); }
+.hint { font-size: var(--fs-xs); color: var(--text-2); }
+.field-error { font-size: var(--fs-xs); color: var(--danger-ink); display: flex; gap: 6px; align-items: center; }
+input, select, textarea { font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-input); padding: 0 var(--s3); min-height: 40px; width: 100%; transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease); }
+textarea { padding: var(--s2) var(--s3); }
+input::placeholder { color: var(--text-3); }
+input:hover, select:hover { border-color: color-mix(in srgb, var(--accent) 35%, var(--border-strong)); }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+input[aria-invalid='true'] { border-color: var(--danger); }
+input:disabled, select:disabled { background: var(--surface-3); color: var(--text-3); cursor: not-allowed; }
+select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--text-2) 50%), linear-gradient(135deg, var(--text-2) 50%, transparent 50%); background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+.input-wrap { position: relative; }
+.input-wrap input { padding-right: 44px; }
+.input-wrap .reveal { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); min-height: 32px; width: 36px; padding: 0; border: 0; background: transparent; color: var(--text-2); }
+.input-wrap .reveal:hover { color: var(--text); background: var(--surface-3); }
+.checks { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.check-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--border-strong); border-radius: var(--r-chip); font-family: var(--mono); font-size: var(--fs-sm); cursor: pointer; transition: background var(--t-fast), border-color var(--t-fast); }
+.check-pill input { width: 15px; height: 15px; min-height: 0; accent-color: var(--accent); margin: 0; }
+.check-pill:has(input:checked) { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); color: var(--accent-ink); }
+fieldset { border: 0; padding: 0; margin: 0 0 var(--s4); min-width: 0; }
+
+/* toolbar: search + filters */
+.toolbar { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; margin-bottom: var(--s4); }
+.toolbar .search { position: relative; flex: 1 1 240px; max-width: 360px; }
+.toolbar .search .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+.toolbar .search input { padding-left: 36px; }
+.toolbar select { width: auto; min-width: 140px; }
+.toolbar .field { margin: 0; flex: 0 1 170px; }
+.toolbar .count { color: var(--text-2); font-size: var(--fs-sm); margin-left: auto; }
+.segmented { display: inline-flex; padding: 3px; background: var(--surface-3); border-radius: 10px; gap: 2px; }
+.segmented button { min-height: 32px; border: 0; background: transparent; color: var(--text-2); padding: 0 var(--s3); border-radius: 8px; font-size: var(--fs-sm); }
+.segmented button[aria-pressed='true'] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-1); }
+.tabs { display: flex; gap: var(--s1); border-bottom: 1px solid var(--border); margin-bottom: var(--s4); overflow-x: auto; }
+.tabs button { border: 0; border-radius: 0; background: transparent; color: var(--text-2); min-height: 42px; padding: 0 var(--s3); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs button:hover { background: transparent; color: var(--text); }
+.tabs button[aria-selected='true'] { color: var(--accent-ink); border-bottom-color: var(--accent); }
+.tabs .badge-count { font-size: var(--fs-xs); background: var(--surface-3); color: var(--text-2); border-radius: var(--r-chip); padding: 0 7px; line-height: 18px; }
+.tabs button[aria-selected='true'] .badge-count { background: var(--accent-soft); color: var(--accent-ink); }
+
+/* ---------- chips / badges ---------- */
+.chip { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: var(--r-chip); font-size: var(--fs-xs); font-weight: 550; white-space: nowrap; background: var(--surface-3); color: var(--text-2); border: 1px solid transparent; }
+.chip .icon { width: 13px; height: 13px; stroke-width: 2.2; }
+.chip.success { background: var(--success-soft); color: var(--success); }
+.chip.warning { background: var(--warning-soft); color: var(--warning-ink); }
+.chip.danger { background: var(--danger-soft); color: var(--danger-ink); }
+.chip.accent { background: var(--accent-soft); color: var(--accent-ink); }
+.chip.outline { background: transparent; border-color: var(--border-strong); }
+.chip.mono { font-family: var(--mono); font-weight: 500; }
+.role-chip { text-transform: capitalize; }
+
+/* file type tile */
+.file-tile { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; position: relative; }
+.file-tile .ext { position: absolute; bottom: -5px; right: -6px; font-family: var(--mono); font-size: 9.5px; font-weight: 500; text-transform: uppercase; background: var(--surface); color: var(--text-2); border: 1px solid var(--border); border-radius: 5px; padding: 0 4px; line-height: 15px; }
+.file-tile.lg { width: 52px; height: 52px; border-radius: 13px; }
+.file-tile.lg .icon { width: 26px; height: 26px; }
+
+/* ---------- tables ---------- */
+.table-wrap { overflow-x: auto; position: relative; }
+.card > .table-wrap { margin: 0 calc(-1 * var(--s6)); }
+.card.flush > .table-wrap { margin: 0; }
+table { width: 100%; border-collapse: collapse; font-size: var(--fs-body); }
+th { text-align: left; font-weight: 550; font-size: var(--fs-xs); color: var(--text-2); padding: 10px var(--s4); background: var(--surface-2); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); white-space: nowrap; }
+th:first-child, td:first-child { padding-left: var(--s6); }
+th:last-child, td:last-child { padding-right: var(--s6); }
+td { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr { transition: background var(--t-fast) var(--ease); }
+tbody tr:hover { background: var(--surface-2); }
+tr.clickable { cursor: pointer; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.actions-cell { text-align: right; white-space: nowrap; }
+td.actions-cell .actions { justify-content: flex-end; flex-wrap: nowrap; }
+.cell-main { display: flex; align-items: center; gap: var(--s3); min-width: 0; }
+.cell-main .t { min-width: 0; }
+.cell-main .t strong, .cell-main .t a { display: block; font-weight: 550; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 38ch; }
+.cell-main .t .sub { font-size: var(--fs-xs); color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mono-sm { font-family: var(--mono); font-size: var(--fs-xs); color: var(--text-3); }
+.details-cell { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); max-width: 44ch; }
+.details-cell div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.details-cell b { font-weight: 500; color: var(--text-3); }
+.matrix td, .matrix th { text-align: center; }
+.matrix td:first-child, .matrix th:first-child { text-align: left; font-family: var(--mono); font-size: var(--fs-sm); }
+
+/* ---------- document grid ---------- */
+.doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--s4); }
+.doc-card { display: flex; flex-direction: column; gap: var(--s4); padding: var(--s5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); color: var(--text); box-shadow: var(--shadow-1); transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), transform var(--t-fast) var(--ease); min-width: 0; }
+.doc-card:hover { text-decoration: none; border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); box-shadow: var(--shadow-2); transform: translateY(-2px); }
+.doc-card .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-card .meta { font-size: var(--fs-xs); color: var(--text-2); }
+.doc-card .foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); margin-top: auto; padding-top: var(--s3); border-top: 1px solid var(--border); font-size: var(--fs-xs); color: var(--text-2); min-width: 0; }
+.doc-card .foot span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- list rows (recent items, activity) ---------- */
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) 0; border-bottom: 1px solid var(--border); min-width: 0; }
+.list li:last-child { border-bottom: 0; padding-bottom: 0; }
+.list li:first-child { padding-top: 0; }
+.list .t { flex: 1; min-width: 0; }
+.list .t a, .list .t strong { display: block; color: var(--text); font-weight: 550; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list .t .sub { font-size: var(--fs-xs); color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dot-icon { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--surface-3); color: var(--text-2); }
+.dot-icon.success { background: var(--success-soft); color: var(--success); }
+.dot-icon.danger { background: var(--danger-soft); color: var(--danger-ink); }
+.dot-icon.warning { background: var(--warning-soft); color: var(--warning-ink); }
+.dot-icon.accent { background: var(--accent-soft); color: var(--accent); }
+.dot-icon .icon { width: 16px; height: 16px; }
+
+.quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--s3); }
+.quick a { display: flex; align-items: center; gap: var(--s3); padding: var(--s4); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-weight: 550; transition: border-color var(--t-fast), background var(--t-fast); }
+.quick a:hover { text-decoration: none; border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); background: var(--accent-soft); }
+
+/* ---------- definition lists ---------- */
+.dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px var(--s5); margin: 0; font-size: var(--fs-sm); }
+.dl dt { color: var(--text-2); }
+.dl dd { margin: 0; overflow-wrap: anywhere; }
+.dl dd.mono { font-family: var(--mono); font-size: var(--fs-xs); }
+
+/* ---------- decision card ---------- */
+.decision { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); overflow: hidden; box-shadow: var(--shadow-1); }
+.decision-head { display: flex; gap: var(--s4); align-items: flex-start; padding: var(--s5) var(--s6); border-bottom: 1px solid var(--border); background: var(--d-soft, var(--surface-2)); }
+.decision.allow { --d: var(--success); --d-ink: var(--success); --d-soft: var(--success-soft); }
+.decision.deny { --d: var(--danger); --d-ink: var(--danger-ink); --d-soft: var(--danger-soft); }
+.decision.info { --d: var(--warning); --d-ink: var(--warning-ink); --d-soft: var(--warning-soft); }
+.decision-head .d-icon { width: 38px; height: 38px; border-radius: 50%; background: var(--surface); color: var(--d); display: grid; place-items: center; flex: none; box-shadow: 0 0 0 1px color-mix(in srgb, var(--d) 25%, transparent); }
+.decision-head .d-main { flex: 1; min-width: 0; }
+.decision-head .d-title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); }
+.decision-head .verdict { font-size: 1.1rem; font-weight: 650; color: var(--d-ink); }
+.decision-head .reason { margin-top: 4px; color: var(--text); }
+.decision-head .subject { margin-top: 2px; color: var(--text-2); font-size: var(--fs-sm); }
+.decision-body { padding: var(--s5) var(--s6); }
+.decision-body > * + * { margin-top: var(--s4); }
+.next-step { display: flex; gap: var(--s3); align-items: flex-start; padding: var(--s3) var(--s4); border-radius: 10px; background: var(--accent-soft); color: var(--text); font-size: var(--fs-sm); }
+.next-step .icon { color: var(--accent); margin-top: 1px; }
+.decision details summary { cursor: pointer; font-size: var(--fs-sm); font-weight: 550; color: var(--text-2); list-style: none; display: flex; align-items: center; gap: 6px; }
+.decision details summary::-webkit-details-marker { display: none; }
+.decision details summary .icon { transition: transform var(--t-fast) var(--ease); width: 16px; height: 16px; }
+.decision details[open] summary .icon { transform: rotate(90deg); }
+.decision details .dl { margin-top: var(--s3); }
+.decision-foot { display: flex; flex-wrap: wrap; gap: 6px var(--s4); padding: var(--s3) var(--s6); border-top: 1px solid var(--border); font-family: var(--mono); font-size: 11.5px; color: var(--text-3); background: var(--surface-2); }
+.decision.enter { animation: rise var(--t-med) var(--ease); }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- notices / alerts ---------- */
+.alert { display: flex; gap: var(--s3); align-items: flex-start; padding: var(--s3) var(--s4); border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); font-size: var(--fs-sm); }
+.alert .icon { margin-top: 1px; }
+.alert.danger { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 25%, transparent); color: var(--text); }
+.alert.danger .icon { color: var(--danger-ink); }
+.alert.success { background: var(--success-soft); border-color: color-mix(in srgb, var(--success) 25%, transparent); }
+.alert.success .icon { color: var(--success); }
+.alert.warning { background: var(--warning-soft); border-color: color-mix(in srgb, var(--warning) 25%, transparent); }
+.alert.warning .icon { color: var(--warning-ink); }
+.alert.info .icon { color: var(--accent); }
+.alert strong { display: block; font-weight: 600; }
+.alert ul { margin: 4px 0 0; padding-left: 18px; }
+.alert .code { font-family: var(--mono); font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+/* ---------- empty / skeleton ---------- */
+.empty { text-align: center; padding: var(--s10) var(--s5); color: var(--text-2); }
+.empty .e-icon { width: 52px; height: 52px; border-radius: 14px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin: 0 auto var(--s4); }
+.empty .e-icon .icon { width: 24px; height: 24px; }
+.empty h3 { color: var(--text); margin-bottom: 4px; }
+.empty p { max-width: 46ch; margin: 0 auto; }
+.empty .actions { justify-content: center; margin-top: var(--s4); }
+.skeleton { display: block; background: linear-gradient(90deg, var(--surface-3) 0%, var(--surface-2) 50%, var(--surface-3) 100%); background-size: 200% 100%; animation: shimmer 1.3s ease-in-out infinite; border-radius: 8px; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.sk-page > * + * { margin-top: var(--s4); }
+.sk-title { height: 30px; width: 240px; }
+.sk-line { height: 14px; width: 60%; }
+.sk-card { height: 120px; border-radius: var(--r-card); }
+.sk-row { height: 52px; border-radius: 10px; }
+.sk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--s4); }
+
+/* ---------- dropzone & upload queue ---------- */
+.dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s3); text-align: center; padding: var(--s10) var(--s6); border: 1.5px dashed var(--border-strong); border-radius: var(--r-card); background: var(--surface-2); cursor: pointer; transition: border-color var(--t-fast), background var(--t-fast); }
+.dropzone:hover, .dropzone.over { border-color: var(--accent); background: var(--accent-soft); }
+.dropzone .dz-icon { width: 56px; height: 56px; border-radius: 16px; background: var(--surface); color: var(--accent); display: grid; place-items: center; box-shadow: var(--shadow-1); }
+.dropzone .dz-icon .icon { width: 26px; height: 26px; }
+.dropzone h3 { font-size: 1.05rem; }
+.dropzone p { color: var(--text-2); font-size: var(--fs-sm); max-width: 48ch; }
+.dropzone .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.queue { list-style: none; margin: 0; padding: 0; }
+.queue > li { padding: var(--s4) 0; border-bottom: 1px solid var(--border); }
+.queue > li:first-child { padding-top: 0; }
+.queue > li:last-child { border-bottom: 0; padding-bottom: 0; }
+.q-row { display: flex; align-items: center; gap: var(--s3); min-width: 0; }
+.q-row .t { flex: 1; min-width: 0; }
+.q-row .t strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 550; }
+.q-row .t .sub { font-size: var(--fs-xs); color: var(--text-2); }
+.progress { height: 6px; border-radius: 99px; background: var(--surface-3); overflow: hidden; margin-top: var(--s2); }
+.progress > span { display: block; height: 100%; width: 0; background: var(--accent); border-radius: inherit; transition: width var(--t-med) var(--ease); }
+.progress.done > span { background: var(--success); }
+.progress.fail > span { background: var(--danger); }
+.q-detail { margin-top: var(--s3); }
+
+/* ---------- fingerprint / code ---------- */
+.fp { display: inline-flex; align-items: center; gap: var(--s2); font-family: var(--mono); font-size: var(--fs-sm); letter-spacing: 0.02em; word-spacing: 0.2em; background: var(--surface-2); border: 1px solid var(--border); padding: 6px 10px; border-radius: 8px; overflow-wrap: anywhere; }
+.code-once { font-family: var(--mono); font-size: 1.35rem; font-weight: 500; letter-spacing: 0.08em; padding: var(--s3) var(--s4); background: var(--accent-soft); color: var(--accent-ink); border-radius: 10px; display: inline-block; user-select: all; }
+
+/* ---------- preview ---------- */
+.preview { border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); max-height: 560px; overflow: auto; }
+.preview pre { margin: 0; padding: var(--s4); white-space: pre-wrap; font-family: var(--mono); font-size: var(--fs-sm); }
+.preview img { display: block; margin: 0 auto; height: auto; }
+.preview iframe { width: 100%; height: 560px; border: 0; display: block; background: #fff; }
+.doc-hero { display: flex; gap: var(--s4); align-items: center; min-width: 0; }
+.doc-hero h1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-hero .meta { display: flex; flex-wrap: wrap; gap: 6px var(--s3); margin-top: 6px; color: var(--text-2); font-size: var(--fs-sm); align-items: center; }
+
+/* ---------- timeline (settings history) ---------- */
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li { position: relative; padding: 0 0 var(--s5) var(--s6); border-left: 2px solid var(--border); margin-left: 6px; }
+.timeline li:last-child { padding-bottom: 0; border-left-color: transparent; }
+.timeline li::before { content: ''; position: absolute; left: -7px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
+.timeline .diff { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); margin-top: 6px; overflow-wrap: anywhere; }
+
+/* ---------- settings sections ---------- */
+.settings-section { display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: var(--s6); padding: var(--s6) 0; border-bottom: 1px solid var(--border); }
+.settings-section:first-child { padding-top: 0; }
+.settings-section .s-desc p { color: var(--text-2); font-size: var(--fs-sm); margin-top: 4px; }
+.settings-section .s-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 var(--s5); align-items: start; }
+.settings-section .s-fields fieldset { grid-column: 1 / -1; }
+.save-bar .actions { margin-top: 22px; }
+.save-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--s3); padding-top: var(--s5); }
+.save-bar .field { flex: 1 1 260px; margin: 0; }
+
+/* ---------- dropdown menu ---------- */
+.menu-wrap { position: relative; }
+.menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 220px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-3); padding: 6px; z-index: 60; opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease); }
+.menu.open { opacity: 1; transform: none; pointer-events: auto; }
+.menu.up { top: auto; bottom: calc(100% + 6px); left: 0; right: 0; }
+.menu .m-head { padding: var(--s2) var(--s3) var(--s3); border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+.menu .m-head strong { display: block; }
+.menu a, .menu button { display: flex; width: 100%; align-items: center; justify-content: flex-start; gap: var(--s3); padding: 8px var(--s3); min-height: 36px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-weight: 500; text-align: left; }
+.menu a:hover, .menu button:hover, .menu a:focus-visible, .menu button:focus-visible { background: var(--surface-3); text-decoration: none; }
+.menu .m-danger { color: var(--danger-ink); }
+
+/* ---------- modal & drawer ---------- */
+dialog { border: 0; padding: 0; background: transparent; color: var(--text); max-width: none; max-height: none; }
+dialog::backdrop { background: var(--overlay); opacity: 0; transition: opacity var(--t-med) var(--ease); }
+dialog[open]::backdrop { opacity: 1; }
+.modal { width: min(480px, calc(100vw - 32px)); background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-3); overflow: hidden; }
+dialog[open] .modal { animation: pop var(--t-med) var(--ease); }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+.modal-body { padding: var(--s6); display: flex; gap: var(--s4); align-items: flex-start; }
+.modal-body .m-icon { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
+.modal-body .m-icon.danger { background: var(--danger-soft); color: var(--danger-ink); }
+.modal-body h2 { font-size: 1.1rem; }
+.modal-body p { margin-top: 6px; color: var(--text-2); }
+.modal-body .m-content { flex: 1; min-width: 0; }
+.modal-foot { display: flex; justify-content: flex-end; gap: var(--s2); padding: var(--s4) var(--s6); background: var(--surface-2); border-top: 1px solid var(--border); flex-wrap: wrap; }
+.modal.wide { width: min(560px, calc(100vw - 32px)); }
+.drawer-dialog { margin: 0 0 0 auto; height: 100vh; }
+.drawer { width: min(560px, 100vw); height: 100vh; background: var(--surface); box-shadow: var(--shadow-3); display: flex; flex-direction: column; }
+dialog[open] .drawer { animation: slide var(--t-med) var(--ease); }
+@keyframes slide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s4) var(--s6); border-bottom: 1px solid var(--border); }
+.drawer-body { padding: var(--s6); overflow-y: auto; flex: 1; }
+
+/* ---------- toasts & tooltips ---------- */
+.toasts { position: fixed; bottom: var(--s5); right: var(--s5); display: flex; flex-direction: column; gap: var(--s2); z-index: 80; width: min(380px, calc(100vw - 32px)); }
+.toast { display: flex; align-items: flex-start; gap: var(--s3); background: var(--surface); color: var(--text); border: 1px solid var(--border); border-left: 3px solid var(--success); padding: var(--s3) var(--s3) var(--s3) var(--s4); border-radius: 12px; box-shadow: var(--shadow-3); font-size: var(--fs-sm); animation: rise var(--t-med) var(--ease); }
+.toast .icon { color: var(--success); margin-top: 1px; }
+.toast.bad { border-left-color: var(--danger); }
+.toast.bad .icon { color: var(--danger-ink); }
+.toast .msg { flex: 1; padding-top: 1px; }
+.toast button { min-height: 26px; width: 26px; padding: 0; border: 0; background: transparent; color: var(--text-3); }
+.toast.leaving { opacity: 0; transform: translateY(4px); transition: opacity var(--t-fast), transform var(--t-fast); }
+[data-tip] { position: relative; }
+[data-tip]:hover::after, [data-tip]:focus-visible::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--text); color: var(--surface); font-size: 11.5px; font-weight: 500; padding: 4px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none; z-index: 70; }
+
+/* ---------- auth screens ---------- */
+.auth { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); background: var(--surface); }
+.auth-aside { position: relative; overflow: hidden; background: #1c1a4a; color: #e8e7ff; padding: clamp(28px, 5vw, 64px); display: flex; flex-direction: column; justify-content: space-between; gap: var(--s8); }
+.auth-aside::before { content: ''; position: absolute; inset: auto -20% -35% auto; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(closest-side, rgba(129, 120, 255, 0.35), transparent); }
+.auth-aside > * { position: relative; }
+.auth-aside .brand { color: #fff; }
+.auth-aside .brand-mark { background: #fff; color: var(--accent); }
+.auth-aside h1 { font-size: clamp(1.9rem, 3.2vw, 2.5rem); color: #fff; max-width: 15ch; letter-spacing: -0.025em; }
+.auth-aside .lead { color: #c4c2f0; margin-top: var(--s4); max-width: 46ch; font-size: 1rem; }
+.feature-list { list-style: none; padding: 0; margin: var(--s6) 0 0; display: grid; gap: var(--s3); }
+.feature-list li { display: flex; gap: var(--s3); align-items: flex-start; color: #dcdaff; }
+.feature-list .icon { color: #a9a3ff; margin-top: 2px; }
+.auth-aside .foot { font-size: var(--fs-sm); color: #a8a6d8; }
+.auth-main { display: flex; align-items: center; justify-content: center; padding: clamp(24px, 6vw, 72px) var(--s5); }
+.auth-card { width: 100%; max-width: 400px; }
+.auth-card h2 { font-size: 1.6rem; letter-spacing: -0.02em; }
+.auth-card .lead { color: var(--text-2); margin: 6px 0 var(--s6); }
+.auth-card .primary { width: 100%; min-height: 44px; margin-top: var(--s2); }
+.auth-card .switch { margin-top: var(--s5); font-size: var(--fs-sm); color: var(--text-2); text-align: center; }
+.auth-card .switch a { font-weight: 600; }
+.auth-card .alert { margin-bottom: var(--s4); }
+.steps { list-style: none; padding: 0; margin: var(--s4) 0 0; display: grid; gap: var(--s2); }
+.steps li { display: flex; gap: var(--s3); align-items: center; color: var(--text-3); font-size: var(--fs-sm); }
+.steps li .s-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border-strong); display: grid; place-items: center; flex: none; }
+.steps li .s-dot .icon { width: 12px; height: 12px; stroke-width: 3; display: none; }
+.steps li.run { color: var(--text); }
+.steps li.run .s-dot { border-color: var(--accent); border-right-color: transparent; animation: spin 0.8s linear infinite; }
+.steps li.done { color: var(--text); }
+.steps li.done .s-dot { background: var(--success); border-color: var(--success); color: #fff; }
+.steps li.done .s-dot .icon { display: block; }
+.steps li.fail { color: var(--danger-ink); }
+.steps li.fail .s-dot { background: var(--danger); border-color: var(--danger); }
+
+.loading-page { display: grid; place-items: center; min-height: 100vh; color: var(--text-2); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .split { grid-template-columns: minmax(0, 1fr); }
+  .settings-section { grid-template-columns: minmax(0, 1fr); gap: var(--s3); }
 }
-
-// ================================================================ audit
-const UUIDISH = /^[0-9a-f]{8}-[0-9a-f-]{27}$/;
-const EVENT_ICON = [
-  [/^AUTH|^SESSION/, 'sign-in'], [/^USER/, 'users'], [/^DOC/, 'file'], [/^GRANT/, 'share'], [/^DOWNLOAD/, 'download'], [/^CONFIG/, 'settings'],
-  [/^AUDIT/, 'audit'], [/^WATERMARK/, 'trace'], [/^REPORT/, 'export'], [/^SYSTEM|^SERVER/, 'server'], [/^ACCESS|^CSRF|^RATE|^REQUEST/, 'shield-alert'],
-];
-const eventIcon = (a) => (EVENT_ICON.find(([re]) => re.test(a)) || [null, 'activity'])[1];
-const OUTCOME_KIND = { success: '', denied: 'danger', error: 'danger', info: 'warning' };
-
-function detailLines(d) {
-  const entries = Object.entries(d || {});
-  if (!entries.length) return '—';
-  return entries.slice(0, 4).map(([k, v]) => {
-    let s = typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v);
-    if (UUIDISH.test(s) || /^[0-9a-f]{40,}$/.test(s)) s = `${s.slice(0, 8)}…`;
-    return h('div', {}, h('b', {}, `${k} `), s);
-  });
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); background: none; }
+  .sidebar { position: fixed; inset: 0 auto 0 0; width: min(296px, 86vw); transform: translateX(-104%); transition: transform var(--t-med) var(--ease); box-shadow: var(--shadow-3); }
+  .sidebar.open { transform: none; }
+  .scrim { display: block; position: fixed; inset: 0; background: var(--overlay); z-index: 35; opacity: 0; pointer-events: none; transition: opacity var(--t-med) var(--ease); }
+  .scrim.show { opacity: 1; pointer-events: auto; }
+  .menu-toggle { display: inline-flex; }
+  .topbar { padding: 0 var(--s4); gap: var(--s3); }
+  .content { padding: var(--s6) var(--s4) 56px; }
+  .grid-2 { grid-template-columns: minmax(0, 1fr); }
+  .auth { grid-template-columns: minmax(0, 1fr); }
+  .auth-aside { padding: var(--s6) var(--s5); }
+  .auth-aside .feature-list, .auth-aside .foot { display: none; }
+  .auth-aside h1 { font-size: 1.5rem; }
+  .auth-aside .lead { font-size: var(--fs-body); margin-top: var(--s2); }
 }
-
-export async function renderAudit(main) {
-  const action = h('select', { 'aria-label': 'Filter by event' }, h('option', { value: '' }, 'All events'));
-  const outcome = h('select', { 'aria-label': 'Filter by outcome' }, h('option', { value: '' }, 'All outcomes'), ['success', 'denied', 'error', 'info'].map((o) => h('option', { value: o }, `${o[0].toUpperCase()}${o.slice(1)}`)));
-  const actor = searchBox({ placeholder: 'Filter by username', label: 'Filter by username' });
-  const verifyOut = h('div', { 'aria-live': 'polite' });
-  const body = h('div', {});
-  const count = h('span', { class: 'count' });
-
-  const PAGE = 50;
-  let shown = [];
-  const row = (e) =>
-    h(
-      'tr',
-      {},
-      h('td', { class: 'num mono-sm' }, String(e.seq)),
-      h('td', { 'data-label': 'Event' }, h('div', { class: 'cell-main' }, h('span', { class: `dot-icon ${OUTCOME_KIND[e.outcome] || ''}` }, icon(eventIcon(e.action))), h('div', { class: 't' }, h('strong', { class: 'mono', style: 'font-size:12.5px' }, e.action), h('div', { class: 'sub', title: e.ts }, formatTime(e.ts))))),
-      h('td', { 'data-label': 'Actor' }, e.actor_name || h('span', { class: 'muted' }, 'system'), e.actor_role ? h('div', { class: 'muted small' }, e.actor_role) : null),
-      h('td', { 'data-label': 'Outcome' }, status(e.outcome)),
-      h('td', { class: 'details-cell', 'data-label': 'Details', title: JSON.stringify(e.details, null, 1) }, detailLines(e.details)),
-      h('td', { class: 'mono-sm', 'data-label': 'Hash', title: `prev ${e.prev_hash}\nhash ${e.hash}` }, `${e.hash.slice(0, 10)}…`),
-      h('td', { class: 'actions-cell' }, h('div', { class: 'actions' }, e.action === 'GRANT_CREATE' && e.target_id ? revokeButton(e) : null))
-    );
-
-  /** Loads the newest page (more = false) or the next older page (more = true) using the API's beforeSeq cursor. */
-  async function load(more = false) {
-    const p = new URLSearchParams({ limit: String(PAGE) });
-    if (action.value) p.set('action', action.value);
-    if (outcome.value) p.set('outcome', outcome.value);
-    if (actor.input.value.trim()) p.set('actor', actor.input.value.trim().toLowerCase());
-    if (more && shown.length) p.set('beforeSeq', String(shown[shown.length - 1].seq));
-    try {
-      const r = await get(`/api/admin/audit?${p}`);
-      if (action.options.length === 1) action.append(...r.actions.map((a) => h('option', { value: a }, a)));
-      shown = more ? shown.concat(r.events) : r.events;
-      const filtered = action.value || outcome.value || actor.input.value.trim();
-      count.textContent = filtered ? `${shown.length} matching events shown` : `${shown.length} of ${r.total} events`;
-      if (!shown.length) {
-        body.replaceChildren(card({}, emptyState({ icon: 'audit', title: 'No events match', body: 'Try clearing the filters.' })));
-        return;
-      }
-      const moreBtn = r.events.length === PAGE ? h('button', { type: 'button' }, icon('chevron-down', { cls: 'sm' }), 'Load older events') : null;
-      moreBtn?.addEventListener('click', () => withBusy(moreBtn, () => load(true)));
-      body.replaceChildren(
-        h(
-          'div',
-          { class: 'card flush' },
-          h(
-            'div',
-            { class: 'table-wrap' },
-            h(
-              'table',
-              { class: 'stack-sm' },
-              h('thead', {}, h('tr', {}, h('th', { class: 'num' }, '#'), h('th', {}, 'Event'), h('th', {}, 'Actor'), h('th', {}, 'Outcome'), h('th', {}, 'Details'), h('th', {}, 'Hash'), h('th', {}, h('span', { class: 'sr-only' }, 'Actions')))),
-              h('tbody', {}, shown.map(row))
-            )
-          )
-        ),
-        moreBtn ? h('div', { class: 'actions', style: 'justify-content:center;margin-top:16px' }, moreBtn) : null
-      );
-    } catch (e) {
-      body.replaceChildren(errorBox(e));
-    }
-  }
-
-  // Incident response: an administrator can revoke any share from its GRANT_CREATE event.
-  function revokeButton(e) {
-    const btn = h('button', { type: 'button', class: 'small danger' }, icon('ban', { cls: 'sm' }), 'Revoke');
-    btn.addEventListener('click', async () => {
-      const who = e.details.recipient || 'the recipient';
-      const ok = await confirmDialog({ title: `Revoke ${who}'s access to ${e.details.filename || 'this file'}?`, body: 'Use this for incident response. The owner will see that an administrator revoked it, and the action is audited.', confirmLabel: 'Revoke access', danger: true, icon: 'ban' });
-      if (!ok) return;
-      await withBusy(btn, async () => {
-        try {
-          await post(`/api/grants/${e.target_id}/revoke`, { confirm: true, reason: 'revoked by administrator (incident response)' });
-          toast(`Revoked ${who}'s access`);
-          load();
-        } catch (ex) {
-          toast(ex.code === 'CONFLICT' ? 'That share was already revoked.' : ex.message, { bad: true });
-        }
-      });
-    });
-    return btn;
-  }
-
-  const verifyBtn = h('button', { type: 'button', class: 'primary' }, icon('shield', { cls: 'sm' }), 'Verify chain');
-  verifyBtn.addEventListener('click', () =>
-    withBusy(verifyBtn, async () => {
-      try {
-        const r = await post('/api/admin/audit/verify');
-        verifyOut.replaceChildren(
-          decisionCard(
-            { decision: r.ok ? 'allow' : 'deny', rule: r.rule, severity: r.severity, recommendedAction: r.recommendedAction, reason: r.ok ? `All ${r.evidence.checked} events verified: every HMAC matches and every link points to the previous event.` : 'The chain is broken. Events at or after the point shown were altered, inserted or removed.', evidence: r.evidence, engine: 'vaultshare-audit/1.0.0', latencyMs: r.latencyMs, id: r.decisionId },
-            { title: r.ok ? 'Chain intact' : 'Tampering detected' }
-          )
-        );
-        load();
-      } catch (e) {
-        verifyOut.replaceChildren(errorBox(e));
-      }
-    })
-  );
-  const exportBtn = h('button', { type: 'button' }, icon('export', { cls: 'sm' }), 'Export JSON');
-  exportBtn.addEventListener('click', () =>
-    withBusy(exportBtn, async () => {
-      try {
-        const { blob, name } = await fetchFile('/api/admin/audit/export');
-        downloadBlob(blob, name);
-        toast(`Exported ${name}`);
-        load();
-      } catch (e) {
-        toast(e.message, { bad: true });
-      }
-    })
-  );
-
-  for (const el of [action, outcome]) el.addEventListener('change', () => load());
-  let t;
-  actor.input.addEventListener('input', () => {
-    clearTimeout(t);
-    t = setTimeout(() => load(), 300);
-  });
-  main.replaceChildren(
-    pageHead('Audit trail', 'Append-only and hash-chained: each event carries an HMAC over its contents and the previous event, so any edit or deletion breaks the chain.', exportBtn, verifyBtn),
-    verifyOut,
-    h('div', { class: 'toolbar', style: 'margin-top:16px' }, actor.wrap, action, outcome, count),
-    body
-  );
-  load();
+@media (max-width: 640px) {
+  :root { --fs-title: 1.5rem; }
+  .topbar-search { display: none; }
+  .card { padding: var(--s5); }
+  .card > .table-wrap { margin: 0 calc(-1 * var(--s5)); }
+  th:first-child, td:first-child { padding-left: var(--s5); }
+  th:last-child, td:last-child { padding-right: var(--s5); }
+  .decision-head, .decision-body { padding-left: var(--s5); padding-right: var(--s5); }
+  .decision-foot { padding-left: var(--s5); padding-right: var(--s5); }
+  .page-head { margin-bottom: var(--s5); }
+  .page-head .actions { width: 100%; }
+  .page-head .actions > * { flex: 1 1 auto; }
+  .toolbar .search { max-width: none; flex-basis: 100%; }
+  .toolbar select, .toolbar .field { flex: 1 1 140px; }
+  .toolbar .count { margin-left: 0; width: 100%; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3); }
+  .stat { padding: var(--s4); flex-direction: column; gap: var(--s3); }
+  .stat .stat-icon { width: 34px; height: 34px; }
+  .doc-grid { grid-template-columns: minmax(0, 1fr); }
+  .dl { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .dl dd { margin-bottom: var(--s2); }
+  .modal-body { flex-direction: column; }
+  .toasts { left: 16px; right: 16px; bottom: 16px; width: auto; }
+  /* responsive tables: stack rows into cards */
+  table.stack-sm thead { display: none; }
+  table.stack-sm, table.stack-sm tbody, table.stack-sm tr, table.stack-sm td { display: block; width: 100%; }
+  table.stack-sm tr { padding: var(--s3) var(--s5); border-bottom: 1px solid var(--border); }
+  table.stack-sm tbody tr:last-child { border-bottom: 0; }
+  table.stack-sm td { border: 0; padding: 3px 0 !important; text-align: left !important; }
+  table.stack-sm td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; color: var(--text-3); font-weight: 550; }
+  table.stack-sm td.actions-cell .actions { justify-content: flex-start; flex-wrap: wrap; padding-top: 6px; }
+  .cell-main .t strong, .cell-main .t a { max-width: none; white-space: normal; overflow-wrap: anywhere; }
+  .details-cell { max-width: none; }
 }
-
-// ================================================================ leak trace
-export function renderTrace(main) {
-  const out = h('div', { class: 'stack', 'aria-live': 'polite' });
-  const input = h('input', { type: 'file', class: 'sr-only', id: 'trace-file', 'aria-label': 'Choose a leaked file' });
-  const manual = h('input', { placeholder: 'VS1.…', spellcheck: 'false', style: 'font-family:var(--mono)' });
-
-  async function verifyPayload(payload, source) {
-    try {
-      const r = await post('/api/admin/trace', { payload });
-      return decisionCard({ decision: r.valid ? 'allow' : 'deny', rule: r.rule, severity: r.severity, recommendedAction: r.recommendedAction, reason: r.reason, evidence: r.evidence, engine: 'vaultshare-watermark/1.0.0', id: r.decisionId }, { title: r.valid ? 'Traced to a download' : 'Not verified', subject: source, openEvidence: true });
-    } catch (e) {
-      return errorBox(e);
-    }
-  }
-
-  input.addEventListener('change', async () => {
-    const f = input.files[0];
-    if (!f) return;
-    out.replaceChildren(alertBox('info', `Reading ${f.name} in this browser…`, 'Only the watermark reference is sent to the server.'));
-    const bytes = new Uint8Array(await f.arrayBuffer());
-    const payloads = await extractWatermarks(f.name, bytes);
-    input.value = '';
-    if (!payloads.length) {
-      out.replaceChildren(decisionCard({ decision: 'deny', rule: 'NO_WATERMARK_FOUND', severity: 'low', reason: 'No VaultShare watermark was found. The file may not come from VaultShare, or the watermark was stripped.', recommendedAction: 'Check the file’s document properties or metadata by hand, or paste a reference below.', evidence: { file: f.name, bytes: bytes.length }, engine: 'browser extractor' }, { title: 'Nothing found' }));
-      return;
-    }
-    out.replaceChildren(...(await Promise.all(payloads.map((p) => verifyPayload(p, `Found in ${f.name}`)))));
-  });
-
-  const chooseBtn = h('button', { type: 'button', class: 'primary' }, icon('plus', { cls: 'sm' }), 'Choose file');
-  chooseBtn.addEventListener('click', (e) => (e.preventDefault(), input.click()));
-  const verifyBtn = h('button', { class: 'primary', type: 'submit' }, 'Verify reference');
-
-  main.replaceChildren(
-    pageHead('Trace a leaked copy', 'Every opened file carries a signed watermark that identifies the exact download. The file is read only in this browser; just the watermark reference is sent for verification.'),
-    h(
-      'div',
-      { class: 'grid-2' },
-      card({}, input, h('label', { class: 'dropzone', for: 'trace-file' }, h('span', { class: 'dz-icon' }, icon('trace')), h('h3', {}, 'Choose the leaked file'), h('p', {}, 'Text, CSV, Markdown, PDF or PNG copies exported by VaultShare.'), chooseBtn)),
-      card(
-        { title: 'Or paste a reference', icon: 'hash', sub: 'Found in a PDF’s document properties or a PNG’s metadata.' },
-        h(
-          'form',
-          {
-            onsubmit: async (e) => {
-              e.preventDefault();
-              if (!manual.value.trim()) return out.replaceChildren(errorBox({ message: 'Paste a reference that starts with VS1.' }));
-              await withBusy(verifyBtn, async () => out.replaceChildren(await verifyPayload(manual.value.trim(), 'Entered by hand')));
-            },
-          },
-          field('Watermark reference', manual),
-          verifyBtn
-        )
-      )
-    ),
-    h('div', { style: 'margin-top:20px' }, out)
-  );
+@media (min-width: 1600px) {
+  :root { --content-max: 1320px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
