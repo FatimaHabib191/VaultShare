@@ -1,0 +1,1094 @@
+{
+  "summary": {
+    "generatedAt": "2026-11-10T16:13:36.453Z",
+    "node": "v22.22.0",
+    "cases": 59,
+    "passed": 59,
+    "failed": 0
+  },
+  "metrics": {
+    "tamperDetection": {
+      "trials": 500,
+      "detected": 500,
+      "rate": 1
+    },
+    "accessMatrix": {
+      "cases": 57,
+      "truePermit": 27,
+      "trueDeny": 30,
+      "falsePermit": 0,
+      "falseDeny": 0,
+      "coverage": "19/19 permissions probed over HTTP",
+      "rows": [
+        {
+          "perm": "doc.upload",
+          "role": "admin",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "doc.upload",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 201
+        },
+        {
+          "perm": "doc.upload",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "doc.list",
+          "role": "admin",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "doc.list",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "doc.list",
+          "role": "viewer",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "doc.read_meta",
+          "role": "admin",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "doc.read_meta",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "doc.read_meta",
+          "role": "viewer",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "doc.download",
+          "role": "admin",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "doc.download",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "doc.download",
+          "role": "viewer",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "doc.delete",
+          "role": "admin",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "doc.delete",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 404
+        },
+        {
+          "perm": "doc.delete",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "grant.create",
+          "role": "admin",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "grant.create",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 404
+        },
+        {
+          "perm": "grant.create",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "grant.revoke",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 404
+        },
+        {
+          "perm": "grant.revoke",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 404
+        },
+        {
+          "perm": "grant.revoke",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "directory.read",
+          "role": "admin",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "directory.read",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "directory.read",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "decision.read_own",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "decision.read_own",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "decision.read_own",
+          "role": "viewer",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "decision.read_all",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "decision.read_all",
+          "role": "operator",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 200
+        },
+        {
+          "perm": "decision.read_all",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 200
+        },
+        {
+          "perm": "report.export_own",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "report.export_own",
+          "role": "operator",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "report.export_own",
+          "role": "viewer",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "report.export_all",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "report.export_all",
+          "role": "operator",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 200
+        },
+        {
+          "perm": "report.export_all",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 200
+        },
+        {
+          "perm": "user.manage",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "user.manage",
+          "role": "operator",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "user.manage",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "config.read",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "config.read",
+          "role": "operator",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "config.read",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "config.write",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 409
+        },
+        {
+          "perm": "config.write",
+          "role": "operator",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "config.write",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "audit.read",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "audit.read",
+          "role": "operator",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "audit.read",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "audit.verify",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "audit.verify",
+          "role": "operator",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "audit.verify",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "audit.export",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "audit.export",
+          "role": "operator",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "audit.export",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "watermark.trace",
+          "role": "admin",
+          "expected": "allow",
+          "actual": "allow",
+          "status": 200
+        },
+        {
+          "perm": "watermark.trace",
+          "role": "operator",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        },
+        {
+          "perm": "watermark.trace",
+          "role": "viewer",
+          "expected": "deny",
+          "actual": "deny",
+          "status": 403
+        }
+      ]
+    },
+    "auditVerify": {
+      "events": 201,
+      "ms": 4
+    },
+    "decisionLatencyMs": {
+      "upload": {
+        "n": 24,
+        "p50": 0.144,
+        "p95": 0.322,
+        "max": 1.14
+      },
+      "upload_content": {
+        "n": 18,
+        "p50": 0.111,
+        "p95": 0.525,
+        "max": 0.525
+      },
+      "download": {
+        "n": 96,
+        "p50": 0.104,
+        "p95": 0.178,
+        "max": 0.457
+      },
+      "share": {
+        "n": 18,
+        "p50": 0.174,
+        "p95": 0.532,
+        "max": 0.532
+      },
+      "decrypt": {
+        "n": 7,
+        "p50": 0.13,
+        "p95": 0.21,
+        "max": 0.21
+      },
+      "audit_verify": {
+        "n": 1,
+        "p50": 2.572,
+        "p95": 2.572,
+        "max": 2.572
+      },
+      "watermark_trace": {
+        "n": 3,
+        "p50": 0.404,
+        "p95": 0.449,
+        "max": 0.449
+      }
+    },
+    "downloadRoundTripMs": {
+      "n": 60,
+      "p50": 2.889,
+      "p95": 4.791,
+      "max": 7.861
+    },
+    "aesGcmThroughput": [
+      {
+        "sizeMb": 1,
+        "encryptMs": 1.16,
+        "decryptMs": 1.141
+      },
+      {
+        "sizeMb": 5,
+        "encryptMs": 5.025,
+        "decryptMs": 5.17
+      },
+      {
+        "sizeMb": 10,
+        "encryptMs": 16.168,
+        "decryptMs": 11.485
+      }
+    ],
+    "automatedTests": {
+      "tests": 86,
+      "pass": 86,
+      "fail": 0,
+      "passRate": 1
+    }
+  },
+  "cases": [
+    {
+      "id": "T1.1",
+      "group": "T1",
+      "title": "Stored ciphertext and database files contain no plaintext",
+      "input": "upload \"CONFIDENTIAL-SAMPLE: merger code…\" as alice",
+      "expected": "marker string absent from DB, WAL and blob",
+      "actual": "marker absent",
+      "evidence": "blob 94 B = 60 + 34 overhead; sha256 bb97b84d37209ddb…",
+      "pass": true
+    },
+    {
+      "id": "T1.2",
+      "group": "T1",
+      "title": "Owner decrypts own document",
+      "input": "alice opens t1-secret.txt",
+      "expected": "ALLOW_OWNER, plaintext identical",
+      "actual": "ALLOW_OWNER, identical=true",
+      "evidence": "decision 5cc5db11",
+      "pass": true
+    },
+    {
+      "id": "T1.3",
+      "group": "T1",
+      "title": "Recipient decrypts with own key after share",
+      "input": "alice → bob, 60 min, 3 downloads; bob opens",
+      "expected": "ALLOW_SHARE then ALLOW_GRANT, plaintext identical",
+      "actual": "ALLOW_SHARE / ALLOW_GRANT, identical=true",
+      "evidence": "grant 7abf5489; wrapped DEK 256 B (RSA-OAEP-2048)",
+      "pass": true
+    },
+    {
+      "id": "T1.4",
+      "group": "T1",
+      "title": "Stolen wrapped key is useless without the recipient's private key",
+      "input": "mallory tries to unwrap bob's wrapped DEK taken from the database",
+      "expected": "DEK_UNWRAP_FAILED",
+      "actual": "DEK_UNWRAP_FAILED",
+      "evidence": "RSA-OAEP decryption error",
+      "pass": true
+    },
+    {
+      "id": "T1.5",
+      "group": "T1",
+      "title": "Administrator cannot obtain document keys",
+      "input": "admin requests download",
+      "expected": "403 FORBIDDEN (no doc.download permission)",
+      "actual": "403 FORBIDDEN",
+      "evidence": "ACCESS_DENIED audited",
+      "pass": true
+    },
+    {
+      "id": "T1.6",
+      "group": "T1",
+      "title": "Fresh random 96-bit IV on every encryption",
+      "input": "20 encryptions of the same file with one key",
+      "expected": "20 distinct IVs",
+      "actual": "20 distinct",
+      "evidence": "IV from crypto.getRandomValues",
+      "pass": true
+    },
+    {
+      "id": "T2.1",
+      "group": "T2",
+      "title": "Single-bit flip in header magic is rejected",
+      "input": "flip 1 bit at header magic (in transit)",
+      "expected": "decryption refused, no plaintext",
+      "actual": "CONTAINER_BAD_MAGIC",
+      "evidence": "AES-GCM tag / container check",
+      "pass": true
+    },
+    {
+      "id": "T2.2",
+      "group": "T2",
+      "title": "Single-bit flip in version byte is rejected",
+      "input": "flip 1 bit at version byte (in transit)",
+      "expected": "decryption refused, no plaintext",
+      "actual": "CONTAINER_UNSUPPORTED_VERSION",
+      "evidence": "AES-GCM tag / container check",
+      "pass": true
+    },
+    {
+      "id": "T2.3",
+      "group": "T2",
+      "title": "Single-bit flip in IV is rejected",
+      "input": "flip 1 bit at IV (in transit)",
+      "expected": "decryption refused, no plaintext",
+      "actual": "INTEGRITY_CHECK_FAILED",
+      "evidence": "AES-GCM tag / container check",
+      "pass": true
+    },
+    {
+      "id": "T2.4",
+      "group": "T2",
+      "title": "Single-bit flip in ciphertext body is rejected",
+      "input": "flip 1 bit at ciphertext body (in transit)",
+      "expected": "decryption refused, no plaintext",
+      "actual": "INTEGRITY_CHECK_FAILED",
+      "evidence": "AES-GCM tag / container check",
+      "pass": true
+    },
+    {
+      "id": "T2.5",
+      "group": "T2",
+      "title": "Single-bit flip in GCM tag is rejected",
+      "input": "flip 1 bit at GCM tag (in transit)",
+      "expected": "decryption refused, no plaintext",
+      "actual": "INTEGRITY_CHECK_FAILED",
+      "evidence": "AES-GCM tag / container check",
+      "pass": true
+    },
+    {
+      "id": "T2.6",
+      "group": "T2",
+      "title": "Random single-bit corruption of stored ciphertext",
+      "input": "500 random bit flips across the 713-byte container",
+      "expected": "100% rejected",
+      "actual": "500/500 rejected",
+      "evidence": "false-negative rate 0 required",
+      "pass": true
+    },
+    {
+      "id": "T2.7",
+      "group": "T2",
+      "title": "Ciphertext altered at rest is rejected end-to-end",
+      "input": "flip 1 bit in SQLite blob, bob opens",
+      "expected": "INTEGRITY_CHECK_FAILED",
+      "actual": "INTEGRITY_CHECK_FAILED",
+      "evidence": "server still released ciphertext (it cannot detect); client refused",
+      "pass": true
+    },
+    {
+      "id": "T2.8",
+      "group": "T2",
+      "title": "Ciphertext swapped between documents is rejected",
+      "input": "decrypt document B ciphertext with document A key/binding",
+      "expected": "INTEGRITY_CHECK_FAILED",
+      "actual": "INTEGRITY_CHECK_FAILED",
+      "evidence": "AAD binds docId + ownerId",
+      "pass": true
+    },
+    {
+      "id": "T2.9",
+      "group": "T2",
+      "title": "Server rejects a non-VaultShare container",
+      "input": "134 zero bytes declared as 100-byte file",
+      "expected": "CIPHERTEXT_MALFORMED",
+      "actual": "CIPHERTEXT_MALFORMED",
+      "evidence": "{\"declaredSize\":100,\"ciphertextBytes\":134,\"expectedBytes\":134,\"check\":\"CONTAINER_BAD_MAGIC\"}",
+      "pass": true
+    },
+    {
+      "id": "T3.1",
+      "group": "T3",
+      "title": "Role × permission matrix enforced by the server",
+      "input": "57 requests (19/19 permissions × 3 roles)",
+      "expected": "0 false permits, 0 false denies",
+      "actual": "0 false permits, 0 false denies",
+      "evidence": "27 correct allows, 30 correct denies",
+      "pass": true
+    },
+    {
+      "id": "T3.2",
+      "group": "T3",
+      "title": "Unauthorised operator gets a generic denial and the attempt is logged",
+      "input": "mallory (no grant) requests download",
+      "expected": "404 NOT_FOUND, no filename in response, audit NO_GRANT",
+      "actual": "404 NOT_FOUND; leaks name=false",
+      "evidence": "audit seq 92 rule NO_GRANT",
+      "pass": true
+    },
+    {
+      "id": "T3.3",
+      "group": "T3",
+      "title": "Unauthenticated request refused",
+      "input": "GET document without a session",
+      "expected": "401 AUTH_REQUIRED",
+      "actual": "401 AUTH_REQUIRED",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "T3.4",
+      "group": "T3",
+      "title": "Viewer cannot re-share a document shared with them",
+      "input": "victor POST /grants",
+      "expected": "403 FORBIDDEN",
+      "actual": "403 FORBIDDEN",
+      "evidence": "grant.create = operator only",
+      "pass": true
+    },
+    {
+      "id": "T3.5",
+      "group": "T3",
+      "title": "Recipient operator cannot share a document they do not own",
+      "input": "bob (recipient) tries to share to mallory",
+      "expected": "404 (owner key not released)",
+      "actual": "404",
+      "evidence": "owner-key endpoint is owner-only",
+      "pass": true
+    },
+    {
+      "id": "T3.6",
+      "group": "T3",
+      "title": "Request with forged CSRF token refused",
+      "input": "bob session, wrong X-CSRF-Token",
+      "expected": "403 CSRF_FAILED",
+      "actual": "403 CSRF_FAILED",
+      "evidence": "synchronizer token + SameSite=Strict",
+      "pass": true
+    },
+    {
+      "id": "T4.1",
+      "group": "T4",
+      "title": "Grant valid before expiry",
+      "input": "share 5 min; open at t+0",
+      "expected": "ALLOW_GRANT",
+      "actual": "ALLOW_GRANT",
+      "evidence": "expiresAt 2026-11-10T16:21:28.259Z",
+      "pass": true
+    },
+    {
+      "id": "T4.2",
+      "group": "T4",
+      "title": "Grant valid 1 s before expiry (edge)",
+      "input": "open at t+4m59s",
+      "expected": "ALLOW_GRANT",
+      "actual": "ALLOW_GRANT",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "T4.3",
+      "group": "T4",
+      "title": "Grant denied exactly at expiry",
+      "input": "open at t+5m00s",
+      "expected": "GRANT_EXPIRED",
+      "actual": "GRANT_EXPIRED",
+      "evidence": "{\"expiresAt\":\"2026-11-10T16:21:28.259Z\",\"evaluatedAt\":\"2026-11-10T16:21:28.272Z\"}",
+      "pass": true
+    },
+    {
+      "id": "T4.4",
+      "group": "T4",
+      "title": "Revocation is immediate and destroys the wrapped key",
+      "input": "owner revokes, recipient retries",
+      "expected": "GRANT_REVOKED, wrapped key erased",
+      "actual": "GRANT_REVOKED, wrapped key erased=true",
+      "evidence": "revoke→deny round trip 6.859 ms",
+      "pass": true
+    },
+    {
+      "id": "T4.5",
+      "group": "T4",
+      "title": "Download limit enforced",
+      "input": "limit 2, three attempts",
+      "expected": "allow, allow, DOWNLOAD_LIMIT_REACHED",
+      "actual": "ALLOW_GRANT, ALLOW_GRANT, DOWNLOAD_LIMIT_REACHED",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "T4.6",
+      "group": "T4",
+      "title": "Limit holds under 10 concurrent requests",
+      "input": "limit 1, 10 parallel downloads",
+      "expected": "exactly 1 success",
+      "actual": "1 success",
+      "evidence": "atomic conditional UPDATE in a transaction",
+      "pass": true
+    },
+    {
+      "id": "T4.7",
+      "group": "T4",
+      "title": "Expiry beyond policy maximum refused",
+      "input": "share for 10081 min (max 10080)",
+      "expected": "GRANT_TTL_OUT_OF_RANGE",
+      "actual": "GRANT_TTL_OUT_OF_RANGE",
+      "evidence": "{\"recipient\":\"victor\",\"requestedMinutes\":10081,\"maxMinutes\":10080,\"requestedDownloads\":3,\"maxDownloads\":10}",
+      "pass": true
+    },
+    {
+      "id": "T4.8",
+      "group": "T4",
+      "title": "Administrator rule change is applied and traceable",
+      "input": "max_grant_ttl_hours 168 → 2 (default 24 → 1), then share 180 min and 120 min",
+      "expected": "deny under new version, allow within limit, CONFIG_CHANGE audited",
+      "actual": "GRANT_TTL_OUT_OF_RANGE (settings v2), ALLOW_SHARE",
+      "evidence": "audit seq 133: {\"max_grant_ttl_hours\":{\"from\":168,\"to\":2},\"default_grant_ttl_hours\":{\"from\":24,\"to\":1}}",
+      "pass": true
+    },
+    {
+      "id": "T5.1",
+      "group": "T5",
+      "title": "Wrong password cannot open the key",
+      "input": "sign in as kim with wrong password",
+      "expected": "AUTH_FAILED (generic)",
+      "actual": "401 AUTH_FAILED",
+      "evidence": "scrypt(authKey) mismatch; private key never unwrapped",
+      "pass": true
+    },
+    {
+      "id": "T5.2",
+      "group": "T5",
+      "title": "After key reset, documents kim owned are unrecoverable",
+      "input": "admin reset → kim re-enrolls (key v2) → opens own file",
+      "expected": "KEY_MISMATCH (no escrow by design)",
+      "actual": "KEY_MISMATCH",
+      "evidence": "{\"grantId\":\"58b25e93-2940-4427-84c6-565c3476d796\",\"isOwnerGrant\":true,\"expiresAt\":null,\"evaluatedAt\":\"2026-11-10T16:22:29.815Z\",\"downloadsUsed\":0,\"downloadLimit\":null,\"grantKeyVersion\":1,\"currentKeyVersion\":2,\"grantFingerprint\":\"bef01a86ff7cfa15\",\"currentFingerprint\":\"61b2b73dd4563e9d\"}",
+      "pass": true
+    },
+    {
+      "id": "T5.3",
+      "group": "T5",
+      "title": "After key reset, grants to the old key are refused with an explanation",
+      "input": "kim (v2) opens file shared to key v1",
+      "expected": "KEY_MISMATCH",
+      "actual": "KEY_MISMATCH",
+      "evidence": "grant key v1 vs current v2",
+      "pass": true
+    },
+    {
+      "id": "T5.4",
+      "group": "T5",
+      "title": "New private key cannot unwrap a DEK wrapped for the old key",
+      "input": "force-unwrap stale wrapped DEK with key v2",
+      "expected": "DEK_UNWRAP_FAILED",
+      "actual": "DEK_UNWRAP_FAILED",
+      "evidence": "cryptographic, not just policy",
+      "pass": true
+    },
+    {
+      "id": "T5.5",
+      "group": "T5",
+      "title": "Recovery path: owner re-shares to the new key",
+      "input": "alice revokes stale grant and shares again",
+      "expected": "ALLOW_SHARE then plaintext restored",
+      "actual": "ALLOW_SHARE, plaintext=shared with kim",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "T5.6",
+      "group": "T5",
+      "title": "Key reset is audited",
+      "input": "inspect audit trail",
+      "expected": "USER_RESET with previous key version",
+      "actual": "{\"username\":\"kim\",\"previousKeyVersion\":1,\"sessionsEnded\":1}",
+      "evidence": "seq 151",
+      "pass": true
+    },
+    {
+      "id": "EX.1",
+      "group": "EX",
+      "title": "Normal sample completes with evidence and no warning",
+      "input": "alice uploads fixtures/samples/access-policy.pdf",
+      "expected": "ALLOW_UPLOAD, severity info",
+      "actual": "ALLOW_UPLOAD, severity info",
+      "evidence": "{\"declaredSize\":4751,\"ciphertextBytes\":4785,\"expectedBytes\":4785,\"containerVersion\":1}",
+      "pass": true
+    },
+    {
+      "id": "EX.2",
+      "group": "EX",
+      "title": "Seeded adverse sample names the specific indicator",
+      "input": "alice uploads fixtures/adverse/not-really.pdf (text named .pdf)",
+      "expected": "CONTENT_TYPE_MISMATCH with the detected type, severity high",
+      "actual": "CONTENT_TYPE_MISMATCH: \"The file is named .pdf but its contents are plain text, not a PDF.\" (high)",
+      "evidence": "detected text, first bytes 5468697320697320; action: Do not upload this file. Its contents are not what its name says; check where it came from.",
+      "pass": true
+    },
+    {
+      "id": "EX.3",
+      "group": "EX",
+      "title": "Disguised executable rejected",
+      "input": "fixtures/adverse/report.pdf.exe",
+      "expected": "TYPE_NOT_ALLOWED",
+      "actual": "TYPE_NOT_ALLOWED",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "EX.4",
+      "group": "EX",
+      "title": "Both results are in history and the rejection is audited",
+      "input": "alice's decision history; audit trail",
+      "expected": "allowed and rejected rows present; DOC_UPLOAD_REJECTED event",
+      "actual": "history both=true; audit seq 162",
+      "evidence": "{\"filename\":\"not-really.pdf\",\"rule\":\"CONTENT_TYPE_MISMATCH\",\"severity\":\"high\",\"detected\":\"text\",\"decisionId\":\"bd58ceee-358b-4549-87cd-d8fc23ccaae8\"}",
+      "pass": true
+    },
+    {
+      "id": "EX.5",
+      "group": "EX",
+      "title": "Sanitised report export contains both results",
+      "input": "export CSV",
+      "expected": "both rules present, no keys or contents",
+      "actual": "contains rejection=true, sanitised=true",
+      "evidence": "ts,actor,action,subject,decision,severity,rule,reason,recommendedAction,configVersion,latencyMs,id",
+      "pass": true
+    },
+    {
+      "id": "EX.6",
+      "group": "EX",
+      "title": "Unauthorised user gets a generic denial; attempt logged without the record",
+      "input": "mallory opens alice's document",
+      "expected": "404 generic, ACCESS_DENIED logged without filename",
+      "actual": "404 NOT_FOUND; audit seq 165",
+      "evidence": "{\"permission\":\"doc.read_meta\",\"reason\":\"no_grant\"}",
+      "pass": true
+    },
+    {
+      "id": "EX.7",
+      "group": "EX",
+      "title": "Client-detected tampering is recorded server-side",
+      "input": "flip 1 bit in transit; browser reports the failure",
+      "expected": "INTEGRITY_CHECK_FAILED decision (high) + audit event",
+      "actual": "INTEGRITY_CHECK_FAILED (high); audit seq 167",
+      "evidence": "{\"downloadId\":\"713815bf-a4f7-4bf8-b0e8-9aed69099945\",\"check\":\"INTEGRITY_CHECK_FAILED\",\"decisionId\":\"691ce316-af84-4810-ade1-9fcc75e85462\"}",
+      "pass": true
+    },
+    {
+      "id": "T-final.1",
+      "group": "T-final",
+      "title": "Malformed JSON",
+      "input": "truncated JSON body",
+      "expected": "400 MALFORMED_JSON, no stack trace",
+      "actual": "400 MALFORMED_JSON",
+      "evidence": "requestId 80f13071",
+      "pass": true
+    },
+    {
+      "id": "T-final.2",
+      "group": "T-final",
+      "title": "Oversized request body",
+      "input": "33 MB JSON body",
+      "expected": "413 PAYLOAD_TOO_LARGE",
+      "actual": "413 PAYLOAD_TOO_LARGE",
+      "evidence": "express.json limit 32 MB",
+      "pass": true
+    },
+    {
+      "id": "T-final.3",
+      "group": "T-final",
+      "title": "File larger than policy limit",
+      "input": "declare 11 MB PDF (limit 10 MB)",
+      "expected": "FILE_TOO_LARGE",
+      "actual": "FILE_TOO_LARGE",
+      "evidence": "{\"extension\":\"pdf\",\"mimeType\":\"application/pdf\",\"sizeBytes\":11534336,\"maxBytes\":10485760,\"allowed\":[\"txt\",\"md\",\"csv\",\"pdf\",\"png\",\"jpg\",\"jpeg\"],\"detectedContent\":\"pdf\",\"firstBytes\":\"255044462d312e37\"}",
+      "pass": true
+    },
+    {
+      "id": "T-final.4",
+      "group": "T-final",
+      "title": "Unsafe file name/type rejected: report.pdf.exe",
+      "input": "report.pdf.exe as application/octet-stream",
+      "expected": "TYPE_NOT_ALLOWED",
+      "actual": "TYPE_NOT_ALLOWED",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "T-final.5",
+      "group": "T-final",
+      "title": "Unsafe file name/type rejected: invoice.exe.pdf",
+      "input": "invoice.exe.pdf as application/pdf",
+      "expected": "TYPE_NOT_ALLOWED",
+      "actual": "TYPE_NOT_ALLOWED",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "T-final.6",
+      "group": "T-final",
+      "title": "Unsafe file name/type rejected: notes.pdf",
+      "input": "notes.pdf as text/plain",
+      "expected": "TYPE_NOT_ALLOWED",
+      "actual": "TYPE_NOT_ALLOWED",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "T-final.7",
+      "group": "T-final",
+      "title": "Unexpected fields (mass assignment) rejected",
+      "input": "extra field isAdmin:true",
+      "expected": "400 VALIDATION_FAILED UNKNOWN_FIELD",
+      "actual": "400 UNKNOWN_FIELD",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "T-final.8",
+      "group": "T-final",
+      "title": "Injection-shaped input treated as data",
+      "input": "username x'); DROP TABLE users;--",
+      "expected": "400 VALIDATION_FAILED; users table intact",
+      "actual": "400; users=6",
+      "evidence": "parameterised statements + allow-list pattern",
+      "pass": true
+    },
+    {
+      "id": "T-final.9",
+      "group": "T-final",
+      "title": "Unauthorised request",
+      "input": "viewer calls admin audit API",
+      "expected": "403 FORBIDDEN + ACCESS_DENIED logged",
+      "actual": "403; audit seq 177",
+      "evidence": "{\"permission\":\"audit.read\",\"method\":\"GET\",\"path\":\"/audit\"}",
+      "pass": true
+    },
+    {
+      "id": "T-final.10",
+      "group": "T-final",
+      "title": "Repeated submission",
+      "input": "same share twice; same upload twice",
+      "expected": "201 then 409 DUPLICATE_ACTIVE_GRANT; 409 ALREADY_UPLOADED",
+      "actual": "201, 409 DUPLICATE_ACTIVE_GRANT; 409 ALREADY_UPLOADED",
+      "evidence": "",
+      "pass": true
+    },
+    {
+      "id": "T-final.11",
+      "group": "T-final",
+      "title": "Brute-force sign-in throttled",
+      "input": "11 wrong attempts in 15 min",
+      "expected": "429 RATE_LIMITED with Retry-After",
+      "actual": "429 retry-after=900s",
+      "evidence": "RATE_LIMITED audited",
+      "pass": true
+    },
+    {
+      "id": "T-final.12",
+      "group": "T-final",
+      "title": "Safe failure after deletion (crypto-shred)",
+      "input": "owner deletes shared file; recipient retries",
+      "expected": "denied; ciphertext and wrapped keys erased",
+      "actual": "DOCUMENT_UNAVAILABLE; blob=NULL",
+      "evidence": "secure_delete pragma on",
+      "pass": true
+    },
+    {
+      "id": "T-final.13",
+      "group": "T-final",
+      "title": "Audit chain verifies before restart",
+      "input": "201 events",
+      "expected": "CHAIN_INTACT",
+      "actual": "CHAIN_INTACT",
+      "evidence": "head 067a921cd02345f4… in 4 ms",
+      "pass": true
+    },
+    {
+      "id": "T-final.14",
+      "group": "T-final",
+      "title": "Recovery after restart",
+      "input": "stop server, start on same data directory, bob opens file",
+      "expected": "data intact, chain intact, file decrypts",
+      "actual": "chain CHAIN_INTACT; plaintext ok=true",
+      "evidence": "startup self-check: CHAIN_INTACT",
+      "pass": true
+    },
+    {
+      "id": "T-final.15",
+      "group": "T-final",
+      "title": "Audit tampering detected",
+      "input": "attacker drops trigger and rewrites event 92 (DOWNLOAD_DENY → success)",
+      "expected": "HASH_MISMATCH at seq 92",
+      "actual": "HASH_MISMATCH at seq 92",
+      "evidence": "HMAC key held outside the database",
+      "pass": true
+    },
+    {
+      "id": "FR-5.1",
+      "group": "FR-5",
+      "title": "Leaked excerpt traces to recipient and download",
+      "input": "20-line excerpt without the visible banner",
+      "expected": "WATERMARK_VERIFIED → bob",
+      "actual": "WATERMARK_VERIFIED → bob",
+      "evidence": "download 448b6a19",
+      "pass": true
+    },
+    {
+      "id": "FR-5.2",
+      "group": "FR-5",
+      "title": "Forged watermark rejected",
+      "input": "alter last 4 chars of tag",
+      "expected": "WATERMARK_FORGED",
+      "actual": "WATERMARK_FORGED",
+      "evidence": "",
+      "pass": true
+    }
+  ]
+}
